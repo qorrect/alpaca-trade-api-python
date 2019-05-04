@@ -15,7 +15,7 @@ def _is_list_like(o):
 
 class REST(object):
 
-    def __init__(self, api_key, staging=False,timeout=5):
+    def __init__(self, api_key, staging=False,timeout=2.5):
         self._api_key = api_key
         self._staging = staging
         self._session = requests.Session()
