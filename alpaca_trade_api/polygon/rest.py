@@ -6,6 +6,7 @@ from .entity import (
     Exchange, SymbolTypeMap, ConditionMap,
     Company, Dividends, Splits, Earnings, Financials, NewsList, Ticker
 )
+from requests.adapters import HTTPAdapter
 
 
 def _is_list_like(o):
@@ -14,18 +15,21 @@ def _is_list_like(o):
 
 class REST(object):
 
-    def __init__(self, api_key, staging=False):
+    def __init__(self, api_key, staging=False,timeout=5):
         self._api_key = api_key
         self._staging = staging
         self._session = requests.Session()
+        self._base_url = 'https://api.polygon.io/'
+        self.timeout = timeout
+        self._session.mount(self._base_url,HTTPAdapter(max_retries=5))
 
     def _request(self, method, path, params=None, version='v1'):
-        url = 'https://api.polygon.io/' + version + path
+        url = self._base_url  + version + path
         params = params or {}
         params['apiKey'] = self._api_key
         if self._staging:
             params['staging'] = 'true'
-        resp = self._session.request(method, url, params=params)
+        resp = self._session.request(method, url, params=params,timeout=self.timeout)
         resp.raise_for_status()
         return resp.json()
 
