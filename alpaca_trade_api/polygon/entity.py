@@ -210,6 +210,8 @@ class News(Entity):
 class NewsList(EntityList):
     _entity_class = News
 
+class Analysts(Entity):
+    pass
 
 class Ticker(Entity):
     pass

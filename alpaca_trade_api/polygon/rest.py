@@ -4,7 +4,7 @@ from .entity import (
     Trade, Trades,
     Quote, Quotes,
     Exchange, SymbolTypeMap, ConditionMap,
-    Company, Dividends, Splits, Earnings, Financials, NewsList, Ticker
+    Company, Dividends, Splits, Earnings, Financials, NewsList, Ticker, Analysts
 )
 from requests.adapters import HTTPAdapter
 
@@ -127,6 +127,11 @@ class REST(object):
 
     def financials(self, symbol):
         return self._get_symbol(symbol, 'financials', Financials)
+
+    def analysts(self, symbol):
+        path = '/meta/symbols/{}/analysts'.format(symbol)
+        return Analysts(self.get(path))
+
 
     def news(self, symbol):
         path = '/meta/symbols/{}/news'.format(symbol)
