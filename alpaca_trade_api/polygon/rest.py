@@ -15,13 +15,13 @@ def _is_list_like(o):
 
 class REST(object):
 
-    def __init__(self, api_key, staging=False,timeout=2.5):
+    def __init__(self, api_key, staging=False,timeout=2.5, max_retries=5):
         self._api_key = api_key
         self._staging = staging
         self._session = requests.Session()
         self._base_url = 'https://api.polygon.io/'
-        self.timeout = timeout
-        self._session.mount(self._base_url,HTTPAdapter(max_retries=5))
+        self._timeout = timeout
+        self._session.mount(self._base_url,HTTPAdapter(max_retries=max_retries))
 
     def _request(self, method, path, params=None, version='v1'):
         url = self._base_url  + version + path
@@ -29,7 +29,7 @@ class REST(object):
         params['apiKey'] = self._api_key
         if self._staging:
             params['staging'] = 'true'
-        resp = self._session.request(method, url, params=params,timeout=self.timeout)
+        resp = self._session.request(method, url, params=params, timeout=self._timeout)
         resp.raise_for_status()
         return resp.json()
 
