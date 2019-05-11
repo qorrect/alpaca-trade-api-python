@@ -7,15 +7,22 @@ from .entity import (
     Company, Dividends, Splits, Earnings, Financials, NewsList, Ticker, Analysts
 )
 from requests.adapters import HTTPAdapter
-
+import urllib.parse
+from .file_cacher import FileCacher
 
 def _is_list_like(o):
     return isinstance(o, (list, set, tuple))
 
 
-class REST(object):
+class REST(FileCacher):
 
-    def __init__(self, api_key, staging=False,timeout=2.5, max_retries=5):
+    def clean_filename(self,str):
+        ret = urllib.parse.quote(str).replace('/','_')
+        return "".join([c for c in ret if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+
+
+    def __init__(self, api_key, staging=False,timeout=5, max_retries=5):
+        super().__init__()
         self._api_key = api_key
         self._staging = staging
         self._session = requests.Session()
@@ -24,14 +31,21 @@ class REST(object):
         self._session.mount(self._base_url,HTTPAdapter(max_retries=max_retries))
 
     def _request(self, method, path, params=None, version='v1'):
-        url = self._base_url  + version + path
-        params = params or {}
-        params['apiKey'] = self._api_key
-        if self._staging:
-            params['staging'] = 'true'
-        resp = self._session.request(method, url, params=params, timeout=self._timeout)
-        resp.raise_for_status()
-        return resp.json()
+        cache_key = self.clean_filename('{}-{}-{}-{}'.format(method, path, params, version))
+        ret = self.read_cache(cache_key)
+        if ret:
+            return ret
+        else:
+            url = self._base_url  + version + path
+            params = params or {}
+            params['apiKey'] = self._api_key
+            if self._staging:
+                params['staging'] = 'true'
+            resp = self._session.request(method, url, params=params, timeout=self._timeout)
+            resp.raise_for_status()
+            ret = resp.json()
+            self.write_cache(cache_key,ret)
+            return ret
 
     def get(self, path, params=None, version='v1'):
         return self._request('GET', path, params=params, version=version)
