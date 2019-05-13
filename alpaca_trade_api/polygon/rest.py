@@ -10,25 +10,25 @@ from requests.adapters import HTTPAdapter
 import urllib.parse
 from .file_cacher import FileCacher
 
+
 def _is_list_like(o):
     return isinstance(o, (list, set, tuple))
 
 
 class REST(FileCacher):
 
-    def clean_filename(self,str):
-        ret = urllib.parse.quote(str).replace('/','_')
-        return "".join([c for c in ret if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+    def clean_filename(self, str):
+        ret = urllib.parse.quote(str).replace('/', '_')
+        return "".join([c for c in ret if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
 
-
-    def __init__(self, api_key, staging=False,timeout=5, max_retries=5):
+    def __init__(self, api_key, staging=False, timeout=5, max_retries=5):
         super().__init__()
         self._api_key = api_key
         self._staging = staging
         self._session = requests.Session()
         self._base_url = 'https://api.polygon.io/'
         self._timeout = timeout
-        self._session.mount(self._base_url,HTTPAdapter(max_retries=max_retries))
+        self._session.mount(self._base_url, HTTPAdapter(max_retries=max_retries))
 
     def _request(self, method, path, params=None, version='v1'):
         cache_key = self.clean_filename('{}-{}-{}-{}'.format(method, path, params, version))
@@ -36,7 +36,7 @@ class REST(FileCacher):
         if ret:
             return ret
         else:
-            url = self._base_url  + version + path
+            url = self._base_url + version + path
             params = params or {}
             params['apiKey'] = self._api_key
             if self._staging:
@@ -44,7 +44,7 @@ class REST(FileCacher):
             resp = self._session.request(method, url, params=params, timeout=self._timeout)
             resp.raise_for_status()
             ret = resp.json()
-            self.write_cache(cache_key,ret)
+            self.write_cache(cache_key, ret)
             return ret
 
     def get(self, path, params=None, version='v1'):
@@ -146,16 +146,33 @@ class REST(FileCacher):
         path = '/meta/symbols/{}/analysts'.format(symbol)
         return Analysts(self.get(path))
 
-
     def news(self, symbol):
         path = '/meta/symbols/{}/news'.format(symbol)
         return NewsList(self.get(path))
 
-    def all_tickers(self):
-        path = '/snapshot/locale/us/markets/stocks/tickers'
+    def all_tickers(self, us_only=True):
+        path = '/reference/tickers'
+        params = { 'active' : 'true'}
+        all_tickers = []
+        if us_only:
+            params['market'] = 'stocks'
+            params['locale'] = 'us'
+            params['page'] = 1
+
+        json = self.get(path, version='v2', params=params)
+        while json:
+            if json and json['page'] and json['perPage']:
+                all_tickers += json['tickers']
+                count = json['count']
+                if json['page'] * json['perPage'] < count:
+                    params['page'] += 1
+                    json = self.get(path, version='v2', params=params)
+                else:
+                    break
+
         return [
             Ticker(ticker) for ticker in
-            self.get(path, version='v2')['tickers']
+            all_tickers
         ]
 
     def snapshot(self, symbol):
