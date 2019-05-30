@@ -21,8 +21,8 @@ class REST(FileCacher):
         ret = urllib.parse.quote(str).replace('/', '_')
         return "".join([c for c in ret if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
 
-    def __init__(self, api_key, staging=False, timeout=5, max_retries=5):
-        super().__init__()
+    def __init__(self, api_key, staging=False, timeout=5, max_retries=5,cache_files=False):
+        super().__init__(cache_files)
         self._api_key = api_key
         self._staging = staging
         self._session = requests.Session()
