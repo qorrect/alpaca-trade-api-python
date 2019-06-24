@@ -19,9 +19,11 @@ class Stream(object):
 
     async def connect(self, loop=None):
         servers = [
-            'nats://{}@nats1.polygon.io:31101'.format(self._api_key),
-            'nats://{}@nats2.polygon.io:31102'.format(self._api_key),
-            'nats://{}@nats3.polygon.io:31103'.format(self._api_key),
+            'nats://{}@192.168.0.172:4222'.format(self._api_key),
+
+            # 'nats://{}@nats1.polygon.io:31101'.format(self._api_key),
+            # 'nats://{}@nats2.polygon.io:31102'.format(self._api_key),
+            # 'nats://{}@nats3.polygon.io:31103'.format(self._api_key),
         ]
 
         # TODO:
