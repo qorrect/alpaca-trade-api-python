@@ -32,6 +32,13 @@ class Agg(Entity):
             return val
         return getattr(super(), key)
 
+    @property
+    def df(self):
+        if not hasattr(self, '_df'):
+            raw = self._raw
+            self._df = pd.DataFrame.from_dict(raw, orient='index')
+        return self._df
+
 
 class Aggs(list):
     def __init__(self, raw):
@@ -210,8 +217,10 @@ class News(Entity):
 class NewsList(EntityList):
     _entity_class = News
 
+
 class Analysts(Entity):
     pass
+
 
 class Ticker(Entity):
     pass
