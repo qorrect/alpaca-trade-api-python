@@ -20,6 +20,18 @@ class Entity(object):
             raw=pprint.pformat(self._raw, indent=4),
         )
 
+    @property
+    def df(self):
+        if not hasattr(self, '_df'):
+            raw = self._raw
+
+            # Normalize a quote into something like an Agg
+            if 'askprice' in raw:
+                raw['close'] = raw['askprice']
+
+            self._df = pd.DataFrame.from_dict(raw, orient='index')
+        return self._df
+
 
 class Agg(Entity):
     def __getattr__(self, key):
@@ -32,12 +44,6 @@ class Agg(Entity):
             return val
         return getattr(super(), key)
 
-    @property
-    def df(self):
-        if not hasattr(self, '_df'):
-            raw = self._raw
-            self._df = pd.DataFrame.from_dict(raw, orient='index')
-        return self._df
 
 
 class Aggs(list):
