@@ -26,8 +26,8 @@ class Entity(object):
             raw = self._raw
 
             # Normalize a quote into something like an Agg
-            if 'askprice' in raw:
-                raw['close'] = raw['askprice']
+            if 'bidprice' in raw:
+                raw['close'] = raw['bidprice']
 
             self._df = pd.DataFrame.from_dict(raw, orient='index')
         return self._df
