@@ -21,7 +21,7 @@ class REST(FileCacher):
         ret = urllib.parse.quote(str).replace('/', '_')
         return "".join([c for c in ret if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
 
-    def __init__(self, api_key, staging=False, timeout=5, max_retries=5,cache_files=False):
+    def __init__(self, api_key, staging=False, timeout=5, max_retries=5, cache_files=False):
         super().__init__(cache_files)
         self._api_key = api_key
         self._staging = staging
@@ -79,6 +79,21 @@ class REST(FileCacher):
         raw = self.get(path, params)
 
         return Quotes(raw)
+
+    def historic_agg_v2(self, symbol,
+                     _from=None, to=None, limit=None):
+        path = '/v2/aggs/ticker/{}/range/1/minute/{}/{}'.format(symbol,_from,to)
+
+        params = {}
+        # if _from is not None:
+        #     params['from'] = _from
+        # if to is not None:
+        #     params['to'] = to
+        # if limit is not None:
+        #     params['limit'] = limit
+        raw = self.get(path, params)
+
+        return Aggs(raw)
 
     def historic_agg(self, size, symbol,
                      _from=None, to=None, limit=None):
@@ -152,7 +167,7 @@ class REST(FileCacher):
 
     def all_tickers(self, us_only=True):
         path = '/reference/tickers'
-        params = { 'active' : 'true'}
+        params = {'active': 'true'}
         all_tickers = []
         if us_only:
             params['market'] = 'stocks'
