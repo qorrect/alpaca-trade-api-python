@@ -9,6 +9,7 @@ from .entity import (
 from requests.adapters import HTTPAdapter
 import urllib.parse
 from .file_cacher import FileCacher
+from datetime import datetime
 
 
 def _is_list_like(o):
@@ -80,9 +81,9 @@ class REST(FileCacher):
 
         return Quotes(raw)
 
-    def historic_agg_v2(self, symbol,
-                     _from=None, to=None, limit=None):
-        path = '/v2/aggs/ticker/{}/range/1/minute/{}/{}'.format(symbol,_from,to)
+    def historic_agg_v2(self,  symbol,
+                         _from=None, to=None, limit=None,timeframe='day'):
+        path = '/aggs/ticker/{}/range/1/{}/{}/{}'.format(symbol,timeframe,_from,to)
 
         params = {}
         # if _from is not None:
@@ -91,9 +92,27 @@ class REST(FileCacher):
         #     params['to'] = to
         # if limit is not None:
         #     params['limit'] = limit
-        raw = self.get(path, params)
+        raw = self.get(path, params,version='v2')
+        map = {'o': 'open', 'c': 'close', 'h': 'high', 'l': 'low', 'v': 'volume', 't': 'timestamp', 'd': 'day', 'n' : 'numberOfWindows'}
+        new_raw = self._v2_to_v1_format(raw,map)
 
-        return Aggs(raw)
+        aggType = 'daily'
+        if timeframe == 'day':
+            aggType = 'daily'
+        elif timeframe == 'minute':
+            aggType = 'min'
+
+        new_raw['aggType'] = aggType
+        return Aggs(new_raw)
+
+    def _v2_to_v1_format(self, raw,map):
+        raw['map'] = map
+        raw['ticks'] = raw['results']
+        for tick in raw['ticks']:
+            start = datetime.fromtimestamp(tick['t'] / 1000)
+            tick['d'] =  start.strftime('%Y-%m-%d')
+
+        return raw
 
     def historic_agg(self, size, symbol,
                      _from=None, to=None, limit=None):
@@ -106,6 +125,7 @@ class REST(FileCacher):
         if limit is not None:
             params['limit'] = limit
         raw = self.get(path, params)
+        print(raw)
 
         return Aggs(raw)
 
