@@ -20,7 +20,7 @@ class Stream(object):
     async def connect(self, loop=None):
         servers = [
             'nats://{}@192.168.0.172:4222'.format(self._api_key),
-            'nats://{}@172.17.0.2:4222'.format(self._api_key),
+            # 'nats://{}@172.17.0.2:4222'.format(self._api_key),
 
             #
             # 'nats://{}@nats1.polygon.io:31101'.format(self._api_key),
