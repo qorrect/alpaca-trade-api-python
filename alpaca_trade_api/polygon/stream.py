@@ -1,7 +1,7 @@
 import asyncio
 import re
 from nats.aio.client import Client as NATS
-
+import os
 from .entity import (
     Quote, Trade, Agg, Entity,
 )
@@ -18,16 +18,28 @@ class Stream(object):
         self._ssids = []
 
     async def connect(self, loop=None):
-        servers = [
-            'nats://{}@192.168.0.210:4222'.format(self._api_key),
-            # 'nats://{}@192.168.0.173:4222'.format(self._api_key),
-            # 'nats://{}@172.17.0.2:4222'.format(self._api_key),
+        if os.environ['CAMEL_NATS_SERVER'] == 'dev':
+            servers = [
+                'nats://{}@192.168.0.210:4222'.format(self._api_key),
+                # 'nats://{}@192.168.0.173:4222'.format(self._api_key),
+                # 'nats://{}@172.17.0.2:4222'.format(self._api_key),
 
-            #
-            # 'nats://{}@nats1.polygon.io:31101'.format(self._api_key),
-            # 'nats://{}@nats2.polygon.io:31102'.format(self._api_key),
-            # 'nats://{}@nats3.polygon.io:31103'.format(self._api_key),
-        ]
+                #
+                # 'nats://{}@nats1.polygon.io:31101'.format(self._api_key),
+                # 'nats://{}@nats2.polygon.io:31102'.format(self._api_key),
+                # 'nats://{}@nats3.polygon.io:31103'.format(self._api_key),
+            ]
+        else:
+            servers = [
+                            # 'nats://{}@192.168.0.210:4222'.format(self._api_key),
+                            # 'nats://{}@192.168.0.173:4222'.format(self._api_key),
+                            # 'nats://{}@172.17.0.2:4222'.format(self._api_key),
+
+                            #
+                            'nats://{}@nats1.polygon.io:31101'.format(self._api_key),
+                            'nats://{}@nats2.polygon.io:31102'.format(self._api_key),
+                            'nats://{}@nats3.polygon.io:31103'.format(self._api_key),
+            ]
 
         # TODO:
         async def error_callback(exc):
