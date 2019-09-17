@@ -18,9 +18,9 @@ class Stream(object):
         self._ssids = []
 
     async def connect(self, loop=None):
-        if os.environ['CAMEL_NATS_SERVER'] == 'dev':
+        if os.environ['CAMEL_ENV'] == 'dev':
             servers = [
-                'nats://{}@192.168.0.210:4222'.format(self._api_key),
+                'nats://{}@192.168.1.5:4222'.format(self._api_key),
                 # 'nats://{}@192.168.0.173:4222'.format(self._api_key),
                 # 'nats://{}@172.17.0.2:4222'.format(self._api_key),
 
