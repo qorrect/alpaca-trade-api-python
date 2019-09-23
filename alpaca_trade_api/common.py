@@ -3,7 +3,8 @@ import os
 
 def get_base_url():
     return os.environ.get(
-        'APCA_API_BASE_URL', 'https://api.alpaca.markets').rstrip('/')
+        'APCA_API_BASE_URL', 'https://'
+                             '').rstrip('/')
 
 
 def get_data_url():
