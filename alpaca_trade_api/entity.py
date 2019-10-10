@@ -78,7 +78,7 @@ class Bars(list):
                 'c': 'close',
                 'v': 'volume',
             }
-            df.columns = [alias[c] for c in df.columns]
+            df.columns = [alias[c]  for c in df.columns]
             df.set_index('time', inplace=True)
             if not df.empty:
                 df.index = pd.to_datetime(
