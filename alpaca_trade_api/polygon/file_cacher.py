@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class FileCacher(object):
 
-    def __init__(self, should_cache_files=False):
+    def __init__(self, should_cache_files=True ):
         self._should_cache_files = should_cache_files
         self._cache_path = os.path.dirname(os.path.abspath(__file__)) + os.sep + 'cache'
 
