@@ -125,7 +125,6 @@ class REST(FileCacher):
         if limit is not None:
             params['limit'] = limit
         raw = self.get(path, params)
-        print(raw)
 
         return Aggs(raw)
 
